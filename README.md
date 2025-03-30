@@ -18,3 +18,4 @@ Combine results from all strains into a single summary matrix (strain × AMR gen
 | Strain | blaTEM-1	| tetA |	mecA	| vanA |
 | ------ | -------- | ---- |  ----  | ---- |
 | 0001 | 1 |	1 |	0 |	0 |
+| ............ 
