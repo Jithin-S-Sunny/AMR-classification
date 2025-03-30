@@ -17,4 +17,4 @@ resfinder.py -i genome_strainX.fasta -o output_dir_strainX
 Combine results from all strains into a single summary matrix (strain × AMR gene presence/absence or abundance)
 | Strain | blaTEM-1	| tetA |	mecA	| vanA |
 | ------ | -------- | ---- |  ----  | ---- |
-| 0001 |
+| 0001 | 1 |	1 |	0 |	0 |
