@@ -39,12 +39,15 @@ Now we have:
 
 | Strain	| blaTEM-1	| tetA	| mecA | vanA | blaTEM-1_mutation |
 | ------ | ------ | ------ | ----- | ----- | ------ |
-| strain001 |	1 |	1 |	0 |	1 | S83L |
-| strain002	| 1	| 0	| 1	| 1	|	E81 |
+| 0001 |	1 |	1 |	0 |	1 | S83L |
+| 0002	| 1	| 0	| 1	| 1	|	E81 |
 
 
+### Demographic Information
 
-
+| Strain | Location | Host |
+| ------ | -------- | ----- |
+| 0001 | UK | Human_01 |
 
 
 
