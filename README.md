@@ -45,11 +45,19 @@ Now we have:
 
 ### Demographic Information
 
-| Strain | Location | Host |
-| ------ | -------- | ----- |
-| 0001 | UK | Human_01 |
+| Strain | Location | Host | Antibiotic_usage |
+| ------ | -------- | ----- | ----- |
+| 0001 | UK | Human_01 | xxx |
 
+By combining the three critical layers of information—AMR gene presence/absence, SNPs within resistance-related genes, and demographic metadata (such as host, geographic location, and sample date)—we create a robust multi-dimensional analysis framework. This combination not only supports machine learning-based classification but also allows for advanced statistical methods like Redundancy Analysis (RDA) and Principal Coordinates Analysis (PCoA), which are effective for uncovering patterns and connections within microbial populations.
 
+For instance:
+1. RDA (Redundancy Analysis) can be employed to assess how much of the variation in AMR gene profiles or SNP variations is accounted for by metadata variables like host species, geographical location, or antibiotic usage patterns. This aids in pinpointing significant environmental or epidemiological factors contributing to resistance.
+2. PCoA (Principal Coordinates Analysis) applied to presence/absence matrices or SNP-generated distance matrices enables us to group strains based on genetic or resistance similarity, while also incorporating metadata to identify regional or host-specific trends.
+
+When these techniques are combined with permutation-based significance tests (such as PERMANOVA), they can statistically confirm associations like:
+1. Certain SNPs being notably more prevalent in isolates from particular locations or types of hosts.
+2. Specific sets of AMR genes co-occurring in strains from hospital-acquired infections compared to environmental strains. 
 
 
 
