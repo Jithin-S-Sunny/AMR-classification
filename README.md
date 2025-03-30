@@ -1,10 +1,6 @@
 # AMR-classification
 This workflow outlines a collection of tools utilised to first predict, presence and absence of genes followed by finding mutations in them and then geography 
 
-Studies used as reference for this framework:
-1. Kim, Jee In, et al. "Machine learning for antimicrobial resistance prediction: current practice, limitations, and clinical perspective." Clinical microbiology reviews 35.3 (2022): e00179-21.
-2. Santos, João Dourado, et al. "INSaFLU-TELEVIR: an open web-based bioinformatics suite for viral metagenomic detection and routine genomic surveillance." Genome Medicine 16.1 (2024): 61.
-
 ## Workflow
 ### Creating gene presence/absence matrix
 
