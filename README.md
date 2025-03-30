@@ -9,9 +9,9 @@ Studies used as reference for this framework:
 ### Creating gene presence/absence matrix
 
 Raw reads in FASTQ format for multiple strains
-fastp -i strain_R1.fastq -I strain_R2.fastq -o clean_R1.fastq -O clean_R2.fastq
-spades.py -1 clean_R1.fastq -2 clean_R2.fastq -o spades_output_strain
-amrfinder -n genome_strain.fasta -o strain_amr.tsv
+1. fastp -i strain_R1.fastq -I strain_R2.fastq -o clean_R1.fastq -O clean_R2.fastq
+2. spades.py -1 clean_R1.fastq -2 clean_R2.fastq -o spades_output_strain
+3. amrfinder -n genome_strain.fasta -o strain_amr.tsv
 or
 rgi main --input_sequence genome_strainX.fasta --output_file strainX_rgi --input_type contig
 or
@@ -26,12 +26,12 @@ Combine results from all strains into a single summary matrix (strain × AMR gen
 
 ### Generating mutations for each strain
 
-bwa mem REF strain_clean_R1.fastq strain_clean_R2.fastq > strain_aln.sam
-samtools view -bS strain_aln.sam | samtools sort -o strain_sorted.bam
-samtools index strain_sorted.bam
-bcftools mpileup -Ou -f REF strain_sorted.bam 
-bcftools call -mv -Ov -o strain_variants.vcf
-snpEff ann bacteria_db strain_variants.vcf > strain_annotated.vcf
+1. bwa mem REF strain_clean_R1.fastq strain_clean_R2.fastq > strain_aln.sam
+2. samtools view -bS strain_aln.sam | samtools sort -o strain_sorted.bam
+3. samtools index strain_sorted.bam
+4. bcftools mpileup -Ou -f REF strain_sorted.bam 
+5. bcftools call -mv -Ov -o strain_variants.vcf
+6. snpEff ann bacteria_db strain_variants.vcf > strain_annotated.vcf
 
 Now we have: 
 1. AMR gene presence/absence matrix — a table of strains × AMR genes
