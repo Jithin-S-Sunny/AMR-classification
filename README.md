@@ -1,4 +1,4 @@
-# AMR-classification
+# AMR-surveillance
 This workflow outlines a collection of tools utilised to first predict, presence and absence of genes followed by finding mutations in them and then geography 
 
 ## Workflow
