@@ -1,4 +1,5 @@
 # AMR-surveillance
+This interactive dashboard visualizes the global distribution of pathogen isolates and SNP (Single Nucleotide Polymorphism) clusters submitted to NCBI. Built using Leaflet.js and PapaParse, the map allows users to explore isolate counts and SNP cluster diversity by country. Data has been preprocessed into compact CSV files for faster loading and smoother browser performance. Users can toggle between views using the sidebar and view country-specific counts via popups on the map. The project is hosted via GitHub Pages and designed for real-time exploration of pathogen surveillance data.
 This workflow outlines a collection of tools utilised to first predict, presence and absence of genes followed by finding mutations in them and then geography 
 
 ## Workflow
