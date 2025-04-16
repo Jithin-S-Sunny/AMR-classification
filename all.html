@@ -5,10 +5,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Leaflet + PapaParse -->
+  <!-- Leaflet + PapaParse + Chart.js -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     html, body { height: 100%; margin: 0; font-family: sans-serif; }
@@ -56,6 +57,8 @@
     <div id="description">
       <p><strong>Isolates</strong> represent pathogen samples submitted by global labs to NCBI.</p>
       <p><strong>SNP Clusters</strong> reflect genetically similar strains grouped by shared variants.</p>
+      <p><strong>Line Graph</strong> shows the Defined Daily Dosage for 64 countries based on 
+      <a href="https://www.pnas.org/doi/10.1073/pnas.2411919121" target="_blank">Eili et al. (2024)</a>.</p> 
     </div>
   </div>
   <div id="map"></div>
@@ -63,26 +66,48 @@
 
 <script>
 let map;
+let dddDataByCountry = {};
+const years = ["2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"];
 
 window.addEventListener('load', function () {
   map = L.map('map', {
-    center: [20, 0], zoom: 2, minZoom: 2, maxZoom: 6
+    center: [20, 0],
+    zoom: 2,
+    minZoom: 2,
+    maxZoom: 6
   });
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
-  loadMode('snp'); // Load SNP view by default
+  Papa.parse("per_country.csv", {
+    download: true,
+    header: true,
+    complete: function (results) {
+      results.data.forEach(row => {
+        const country = row["Country"]?.trim().toLowerCase();
+        if (country) {
+          dddDataByCountry[country] = years.map(y => {
+            const raw = row[y] || "0";
+            const cleaned = raw.replace(/,/g, '');
+            return parseInt(cleaned) || 0;
+          });
+        }
+      });
+
+      loadMode('snp'); // Load map view only after DDD data is loaded
+    }
+  });
 });
 
 function getColor(d) {
   return d > 100 ? '#8e0152' :
-         d > 50  ? '#c51b7d' :
-         d > 20  ? '#de77ae' :
-         d > 10  ? '#f1b6da' :
-         d > 0   ? '#fde0ef' :
-                   '#f7f7f7';
+    d > 50 ? '#c51b7d' :
+    d > 20 ? '#de77ae' :
+    d > 10 ? '#f1b6da' :
+    d > 0 ? '#fde0ef' :
+    '#f7f7f7';
 }
 
 function loadMode(mode) {
@@ -90,41 +115,25 @@ function loadMode(mode) {
     if (layer instanceof L.GeoJSON) map.removeLayer(layer);
   });
 
-  if (mode === 'snp') {
-    Papa.parse("country_snp_counts.csv", {
-      download: true,
-      header: true,
-      delimiter: ",",
-      complete: function(results) {
-        const snpCountByCountry = {};
-        results.data.forEach(row => {
-          const country = row["Country"]?.trim().toLowerCase();
-          const count = parseInt(row["SNP_Cluster_Count"]);
-          if (country && !isNaN(count)) {
-            snpCountByCountry[country] = count;
-          }
-        });
-        fetchGeoJson(snpCountByCountry, 'SNP Clusters');
-      }
-    });
-  } else if (mode === 'isolate') {
-    Papa.parse("country_isolate_counts.csv", {
-      download: true,
-      header: true,
-      delimiter: ",",
-      complete: function(results) {
-        const isolateCountByCountry = {};
-        results.data.forEach(row => {
-          const country = row["Country"]?.trim().toLowerCase();
-          const count = parseInt(row["Isolate_Count"]);
-          if (country && !isNaN(count)) {
-            isolateCountByCountry[country] = count;
-          }
-        });
-        fetchGeoJson(isolateCountByCountry, 'Isolates');
-      }
-    });
-  }
+  const file = mode === 'snp' ? "country_snp_counts.csv" : "country_isolate_counts.csv";
+  const keyColumn = mode === 'snp' ? "SNP_Cluster_Count" : "Isolate_Count";
+
+  Papa.parse(file, {
+    download: true,
+    header: true,
+    delimiter: ",",
+    complete: function (results) {
+      const dataMap = {};
+      results.data.forEach(row => {
+        const country = row["Country"]?.trim().toLowerCase();
+        const count = parseInt(row[keyColumn]);
+        if (country && !isNaN(count)) {
+          dataMap[country] = count;
+        }
+      });
+      fetchGeoJson(dataMap, keyColumn.replace("_", " "));
+    }
+  });
 }
 
 function fetchGeoJson(dataMap, label) {
@@ -145,13 +154,69 @@ function fetchGeoJson(dataMap, label) {
         },
         onEachFeature: function (feature, layer) {
           const name = feature.properties.name.trim();
-          const count = dataMap[name.toLowerCase()] || 0;
-          layer.bindPopup(`<b>${name}</b><br>${label}: ${count}`);
+          const key = name.toLowerCase();
+          const count = dataMap[key] || 0;
 
+          const chartId = "chart_" + key.replace(/\s+/g, '_') + "_" + Math.floor(Math.random() * 10000);
+          let popupContent = `<b>${name}</b><br>${label}: ${count}`;
+
+          if (dddDataByCountry[key]) {
+            popupContent += `<br><canvas id="${chartId}" width="280" height="150"></canvas>`;
+
+            layer.on("popupopen", () => {
+              const ctx = document.getElementById(chartId)?.getContext("2d");
+              if (ctx) {
+                new Chart(ctx, {
+                  type: 'line',
+                  data: {
+                    labels: years,
+                    datasets: [{
+                      label: 'Antibiotic DDDs',
+                      data: dddDataByCountry[key],
+                      borderColor: 'rgba(75,192,192,1)',
+                      fill: false,
+                      tension: 0.2
+                    }]
+                  },
+                  options: {
+                    responsive: false,
+                    plugins: {
+                      legend: { display: false },
+                      title: { display: false }
+                    },
+                    scales: {
+                      x: {
+                        title: {
+                          display: true,
+                          text: 'Year',
+                          font: { size: 14, weight: 'bold' }
+                        }
+                      },
+                      y: {
+                        title: {
+                          display: true,
+                          text: 'Defined Daily Doses (DDDs)',
+                          font: { size: 14, weight: 'bold' }
+                        },
+                        ticks: {
+                          callback: function (value) {
+                            return (value / 1e6).toFixed(1) + 'M';
+                          }
+                        }
+                      }
+                    }
+                  }
+                });
+              }
+            });
+          }
+
+          layer.bindPopup(popupContent);
         }
       }).addTo(map);
     });
 }
 </script>
+
 </body>
 </html>
