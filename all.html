@@ -12,25 +12,97 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    html, body { height: 100%; margin: 0; font-family: sans-serif; }
-    #container { display: flex; height: 100vh; width: 100vw; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    #container {
+      position: relative;
+      height: 100vh;
+      width: 100vw;
+    }
+
     #sidebar {
-      width: 260px; background: #f4f4f4; padding: 20px; overflow-y: auto;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 100%;
+      background: #f4f4f4;
+      padding: 20px;
+      overflow-y: auto;
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease-in-out;
+      transform: translateX(-100%);
+      z-index: 998;
     }
-    #map { flex-grow: 1; }
-    h2, h3 { margin-top: 0; }
+
+    #sidebar.visible {
+      transform: translateX(0);
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    #menu-toggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 999;
+      background: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    h2, h3 {
+      margin-top: 0;
+    }
+
     .button {
-      margin: 10px 0; padding: 10px; background: #007BFF; color: white;
-      border: none; border-radius: 4px; cursor: pointer; text-align: center;
+      margin: 10px 0;
+      padding: 10px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
     }
-    .button:hover { background: #0056b3; }
-    #legend { margin-top: 20px; font-size: 14px; line-height: 1.4; }
-    #legend div { margin-bottom: 5px; }
+
+    .button:hover {
+      background: #0056b3;
+    }
+
+    #legend {
+      margin-top: 20px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    #legend div {
+      margin-bottom: 5px;
+    }
+
     #legend span {
-      display: inline-block; width: 20px; height: 12px;
-      margin-right: 8px; vertical-align: middle;
+      display: inline-block;
+      width: 20px;
+      height: 12px;
+      margin-right: 8px;
+      vertical-align: middle;
     }
+
     #description {
       font-size: 12px;
       margin-top: 15px;
@@ -40,6 +112,9 @@
   </style>
 </head>
 <body>
+
+<button id="menu-toggle">☰</button>
+
 <div id="container">
   <div id="sidebar">
     <h2>Dashboard</h2>
@@ -56,9 +131,9 @@
     </div>
     <div id="description">
       <p><strong>Click Isolates:</strong> represent pathogen samples submitted by global labs to NCBI.</p>
-      <p><strong>Click SNP Clusters:</strong> reflect genetically similar strains grouped by shared variants.</p>
-      <p><strong>Click Countries for Graph:</strong> shows the Defined Daily Dosage for 64 countries based on 
-      <a href="https://www.pnas.org/doi/10.1073/pnas.2411919121" target="_blank">Eili et al. (2024)</a>.</p> 
+      <p><strong>SNP Clusters</strong> reflect genetically similar strains grouped by shared variants.</p>
+      <p><strong>Line Graph</strong> shows the Defined Daily Dosage for 64 countries based on 
+        <a href="https://www.pnas.org/doi/10.1073/pnas.2411919121" target="_blank">Eili et al. (2024)</a>.</p> 
     </div>
   </div>
   <div id="map"></div>
@@ -81,6 +156,12 @@ window.addEventListener('load', function () {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
+  map.on('click', () => {
+    if (window.innerWidth < 768) {
+      document.getElementById('sidebar').classList.remove('visible');
+    }
+  });
+
   Papa.parse("per_country.csv", {
     download: true,
     header: true,
@@ -96,9 +177,14 @@ window.addEventListener('load', function () {
         }
       });
 
-      loadMode('snp'); // Load map view only after DDD data is loaded
+      loadMode('snp');
     }
   });
+});
+
+document.getElementById('menu-toggle').addEventListener('click', function () {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('visible');
 });
 
 function getColor(d) {
