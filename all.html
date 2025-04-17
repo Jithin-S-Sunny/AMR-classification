@@ -32,7 +32,6 @@
       width: 260px;
       height: 100%;
       background: #f4f4f4;
-      padding: 20px;
       overflow-y: auto;
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
       transition: transform 0.3s ease-in-out;
@@ -42,6 +41,10 @@
 
     #sidebar.visible {
       transform: translateX(0);
+    }
+
+    #sidebar-content {
+      padding: calc(env(safe-area-inset-top, 0px) + 60px) 20px 20px 20px;
     }
 
     #map {
@@ -54,16 +57,17 @@
 
     #menu-toggle {
       position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 999;
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
+      left: calc(env(safe-area-inset-left, 0px) + 16px);
+      z-index: 1001;
       background: #007BFF;
       color: white;
       border: none;
-      padding: 10px 14px;
-      font-size: 20px;
+      padding: 6px 10px;
+      font-size: 16px;
       cursor: pointer;
       border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
 
     h2, h3 {
@@ -109,6 +113,11 @@
       color: #444;
       text-align: justify;
     }
+
+    .leaflet-bottom.leaflet-right {
+      margin-bottom: 20px;
+      margin-right: 15px;
+    }
   </style>
 </head>
 <body>
@@ -117,23 +126,25 @@
 
 <div id="container">
   <div id="sidebar">
-    <h2>Dashboard</h2>
-    <button class="button" onclick="loadMode('snp')">SNP Cluster View</button>
-    <button class="button" onclick="loadMode('isolate')">Isolate Count View</button>
-    <h3>Country Color Scale</h3>
-    <div id="legend">
-      <div><span style="background:#8e0152"></span> > 100</div>
-      <div><span style="background:#c51b7d"></span> > 50</div>
-      <div><span style="background:#de77ae"></span> > 20</div>
-      <div><span style="background:#f1b6da"></span> > 10</div>
-      <div><span style="background:#fde0ef"></span> > 0</div>
-      <div><span style="background:#f7f7f7"></span> 0</div>
-    </div>
-    <div id="description">
-      <p><strong>Click Isolates:</strong> represent pathogen samples submitted by global labs to NCBI.</p>
-      <p><strong>SNP Clusters</strong> reflect genetically similar strains grouped by shared variants.</p>
-      <p><strong>Line Graph</strong> shows the Defined Daily Dosage for 64 countries based on 
-        <a href="https://www.pnas.org/doi/10.1073/pnas.2411919121" target="_blank">Eili et al. (2024)</a>.</p> 
+    <div id="sidebar-content">
+      <h2>AMR Surveillance</h2>
+      <button class="button" onclick="loadMode('snp')">SNP Cluster View</button>
+      <button class="button" onclick="loadMode('isolate')">Isolate Count View</button>
+      <h3>Country Color Scale</h3>
+      <div id="legend">
+        <div><span style="background:#8e0152"></span> > 100</div>
+        <div><span style="background:#c51b7d"></span> > 50</div>
+        <div><span style="background:#de77ae"></span> > 20</div>
+        <div><span style="background:#f1b6da"></span> > 10</div>
+        <div><span style="background:#fde0ef"></span> > 0</div>
+        <div><span style="background:#f7f7f7"></span> 0</div>
+      </div>
+      <div id="description">
+        <p><strong>Click Isolates:</strong> represent pathogen samples submitted by global labs to NCBI.</p>
+        <p><strong>SNP Clusters</strong> reflect genetically similar strains grouped by shared variants.</p>
+        <p><strong>Line Graph</strong> shows the Defined Daily Dosage for 64 countries based on 
+          <a href="https://www.pnas.org/doi/10.1073/pnas.2411919121" target="_blank">Eili et al. (2024)</a>.</p> 
+      </div>
     </div>
   </div>
   <div id="map"></div>
@@ -149,8 +160,11 @@ window.addEventListener('load', function () {
     center: [20, 0],
     zoom: 2,
     minZoom: 2,
-    maxZoom: 6
+    maxZoom: 6,
+    zoomControl: false
   });
+
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
